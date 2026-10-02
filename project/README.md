@@ -22,7 +22,11 @@ For each series, I apply two types of tests: a Chow test at break dates chosen i
 - matplotlib 3.11.2
 
 ## Replication instructions
-*To be added as scripts are written.*
+
+Activate the conda environment and run the scripts in order from the repository root:
+
+1. `python project/code/01_clean_data.py` — reads the raw file in `data/raw/`, reshapes it (years as rows), and saves `data/clean/lfpr_women_by_age.csv`.
+2. `python project/code/02_summary_stats.py` — produces `output/table1_summary_stats.csv` (summary statistics) and `output/fig1_lfpr_by_age.png` (raw series' figure).
 
 ## Folder structure
 
