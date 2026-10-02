@@ -66,7 +66,7 @@ for col, color in zip(age_groups, colors):
 ax.plot(df.index, df["age_16plus"], color="black", linewidth=2.5,
         linestyle="--", label=labels["age_16plus"])
 
-ax.set_title("Labor force participation rate of U.S. women by age group, 1948-2025")
+ax.set_title("Labor Force Participation Rate of U.S. Women by Age Group, 1948-2025")
 ax.set_xlabel("Year")
 ax.set_ylabel("Participation rate (%)")
 ax.set_xlim(df.index.min(), df.index.max())
