@@ -1,0 +1,15 @@
+series,form,za_stat,za_p,crit_5pct,break_year
+age_16plus,levels,-3.35,0.874,-5.07,1983
+age_16plus,differences,-6.21,0.001,-4.81,1997
+age_16_24,levels,-4.12,0.424,-5.07,1971
+age_16_24,differences,-3.58,0.626,-4.81,1987
+age_25_34,levels,-4.8,0.108,-5.07,1971
+age_25_34,differences,-4.12,0.279,-4.81,1964
+age_35_44,levels,-4.17,0.391,-5.07,1975
+age_35_44,differences,-4.7,0.071,-4.81,1989
+age_45_54,levels,-4.26,0.34,-5.07,1984
+age_45_54,differences,-6.1,0.001,-4.81,1976
+age_55_64,levels,-3.55,0.784,-5.07,2000
+age_55_64,differences,-3.89,0.422,-4.81,1987
+age_65plus,levels,-3.11,0.945,-5.07,1972
+age_65plus,differences,-8.65,0.0,-4.81,1987
