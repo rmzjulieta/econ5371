@@ -20,6 +20,7 @@ For each series, I apply two types of tests: a Chow test at break dates chosen i
 - numpy 2.4.6
 - statsmodels 0.15.0
 - matplotlib 3.11.2
+- functions.py
 
 ## Replication instructions
 
@@ -27,6 +28,10 @@ Activate the conda environment and run the scripts in order from the repository 
 
 1. `python project/code/01_clean_data.py` — reads the raw file in `data/raw/`, reshapes it (years as rows), and saves `data/clean/lfpr_women_by_age.csv`.
 2. `python project/code/02_summary_stats.py` — produces `output/table1_summary_stats.csv` (summary statistics) and `output/fig1_lfpr_by_age.png` (raw series' figure).
+3. `python project/code/03_unit_root_tests.py` — ADF, KPSS and Zivot–Andrews unit-root tests in levels and first differences; saves output/table2_unit_root_tests.csv and output/table3_zivot_andrews.csv.
+4.  `python project/code/04_break_tests.py` — Chow, QLR and Bai–Perron break tests on the first-differenced series, using functions.py (ECON 5371, Lab 3); saves output/table4_chow_tests.csv and output/table5_qlr_baiperron.csv.
+5.  `python project/code/05_period_analysis.py` — splits each series at its break years and classifies each period as trend-stationary or difference-stationary; saves output/table6_period_analysis.csv.
+6.  `python project/code/06_figure_breaks.py` — plots each series with its Bai–Perron breaks and period trends; saves output/fig2_breaks_by_age.png.
 
 ## Folder structure
 
