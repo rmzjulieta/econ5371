@@ -4,7 +4,7 @@
 
 This project asks whether the U.S. female labor force participation rate (LFPR) experienced structural breaks between 1948 and 2025, and whether those breaks occurred at different times for women of different ages. I analyze annual data for six age groups (16-24, 25-34, 35-44, 45-54, 55-64, and 65+) and for the aggregate rate (16 and older), which serves as a benchmark.
 
-For each series, I apply two types of tests: a Chow test at break dates chosen in advance based on historical and policy events, and a test that estimates the break dates from the data itself. I then interpret each detected break in light of the historical and policy context of its period. Comparing the aggregate with the age groups also shows whether changes in the total reflect changes in women's behavior or shifts in the age composition of the population. 
+For each series, I first test for unit roots (ADF, KPSS, and Zivot–Andrews tests). Because the series are I(1) in levels, I apply three structural break tests to their first differences: a Chow test at candidate break dates chosen from the raw series’ figure, a QLR test that estimates a single break date from the data, and a Bai–Perron-type procedure that allows for multiple breaks. I then divide each series into periods at the estimated break dates, classify each period as trend-stationary or difference-stationary, and summarize it by its trend slope. Comparing the aggregate with the age groups shows whether the timing of the breaks differs across ages. 
 
 ## Data source
 
@@ -20,7 +20,7 @@ For each series, I apply two types of tests: a Chow test at break dates chosen i
 - numpy 2.4.6
 - statsmodels 0.15.0
 - matplotlib 3.11.2
-- functions.py
+- scipy 1.17.1
 
 ## Replication instructions
 
