@@ -62,8 +62,8 @@ axes[-1].axis("off")
 axes[-2].set_xlabel("Year")
 axes[-3].set_xlabel("Year")
 fig.suptitle("Female labor force participation by age group: "
-             "Bai-Perron breaks and period trends\n"
-             "(red labels: trend slope, percentage points per year)",
+             "Bai-Perron breaks and period trends,\n"
+             "1948-2025",
              fontsize=11)
 fig.tight_layout()
 fig.savefig(FIG_FILE, dpi=200)
