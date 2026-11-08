@@ -32,7 +32,7 @@ Activate the conda environment and run the scripts in order from the repository 
 4.  `python project/code/04_break_tests.py` — Chow, QLR and Bai–Perron break tests on the first-differenced series, using functions.py (ECON 5371, Lab 3); saves output/table4_chow_tests.csv and output/table5_qlr_baiperron.csv.
 5.  `python project/code/05_period_analysis.py` — splits each series at its break years and classifies each period as trend-stationary or difference-stationary; saves output/table6_period_analysis.csv.
 6.  `python project/code/06_figure_breaks.py` — plots each series with its Bai–Perron breaks and period trends; saves output/fig2_breaks_by_age.png.
-7.  `python project/code/07_forecast.py:` out-of-sample forecast comparison (2015–2025). Outputs: table7_forecast_evaluation.csv, forecasts_2015_2025.csv, fig3_forecasts.png, fig4_cumulative_loss.png.”
+7.  `python project/code/07_forecast.py`: out-of-sample forecast comparison (2015–2025). Outputs: table7_forecast_evaluation.csv, forecasts_2015_2025.csv, fig3_forecasts.png, fig4_cumulative_loss.png.
 
 ## Folder structure
 

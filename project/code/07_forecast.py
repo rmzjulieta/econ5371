@@ -109,14 +109,14 @@ for label, mask in samples.items():
     ea, eb = e_full[mask], e_post[mask]
     dm_hln = dm_test(ea, eb, h=1, small_sample=True)
     dm_norm = dm_test(ea, eb, h=1, small_sample=False)
-    rows.append({"sample": label, "n_forecasts": int(mask.sum()),
-                 "rmse_full_drift": round(np.sqrt(np.mean(ea**2)), 3),
-                 "rmse_post_break_drift": round(np.sqrt(np.mean(eb**2)), 3),
-                 "d_bar": round(dm_hln["d_bar"], 3),
-                 "dm_normal": round(dm_norm["dm_stat"], 2),
-                 "p_normal": round(dm_norm["p_value"], 3),
-                 "dm_hln": round(dm_hln["dm_stat"], 2),
-                 "p_hln": round(dm_hln["p_value"], 3)})
+    rows.append({"Evaluation sample": label, "N": int(mask.sum()),
+                 "RMSE full-sample drift": round(np.sqrt(np.mean(ea**2)), 3),
+                 "RMSE post-break drift": round(np.sqrt(np.mean(eb**2)), 3),
+                 "Mean loss differential (d_bar)": round(dm_hln["d_bar"], 3),
+                 "DM normal": round(dm_norm["dm_stat"], 2),
+                 "p-value normal": round(dm_norm["p_value"], 3),
+                 "DM HLN": round(dm_hln["dm_stat"], 2),
+                 "p-value HLN": round(dm_hln["p_value"], 3)})
 
 table = pd.DataFrame(rows)
 print(f"\n{'='*72}")
