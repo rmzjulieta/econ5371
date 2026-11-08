@@ -28,11 +28,17 @@ df = pd.read_csv(CLEAN_FILE, index_col="year")
 # Levels trend upward for decades, so the test regression includes a constant
 # and a linear trend ("ct"). First differencing removes the trend, so the
 # differenced series only needs a constant ("c").
+# Lag length is selected by BIC rather than AIC. With only 78 annual
+# observations, AIC selected up to 11 lags for some series, which uses up
+# much of the sample and made the results unstable (the aggregate looked
+# stationary in levels but not in differences). BIC penalizes extra lags
+# more heavily and selects 0-2 lags, which is typical for annual data.
+
 results = []
 for col in df.columns:
     for form, series, reg in [("levels", df[col], "ct"),
                               ("differences", df[col].diff().dropna(), "c")]:
-        adf_stat, adf_p, *_ = adfuller(series, regression=reg, autolag="AIC")
+        adf_stat, adf_p, *_ = adfuller(series, regression=reg, autolag="BIC")
         kpss_stat, kpss_p, *_ = kpss(series, regression=reg, nlags="auto")
         results.append({"series": col, "form": form,
                         "adf_stat": round(adf_stat, 2), "adf_p": round(adf_p, 3),
@@ -50,12 +56,14 @@ table.to_csv(OUT_FILE, index=False)
 # 15% trimmed window used by the QLR test later.
 # Levels: break allowed in both intercept and trend ("ct").
 # Differences: break allowed in the mean ("c"), i.e., a shift in the drift.
+# Lag length selected by BIC (maximum of 4 lags), consistent with the ADF test.
+
 za_results = []
 for col in df.columns:
     for form, series, reg in [("levels", df[col], "ct"),
                               ("differences", df[col].diff().dropna(), "c")]:
         za_stat, za_p, crit, lags, break_idx = zivot_andrews(
-            series, trim=0.15, maxlag=4, regression=reg, autolag="AIC")
+            series, trim=0.15, maxlag=4, regression=reg, autolag="BIC")
         za_results.append({"series": col, "form": form,
                            "za_stat": round(za_stat, 2), "za_p": round(za_p, 3),
                            "crit_5pct": round(crit["5%"], 2),
