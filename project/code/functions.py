@@ -1,29 +1,19 @@
 """
-functions.py -- Lab 3 (Structural Breaks)
+functions.py -- ECON 5371 research project
 
-Three functions this lab: run_chow_test(), run_qlr_test(), and
-detect_multiple_breaks(). Unlike the earlier labs, where repeated code
-was wrapped in a function and kept INSIDE the lab script, these live
-in their own file, functions.py, in the same folder.
+Purpose : Reusable test functions for the structural break and forecast
+          analysis of U.S. female labor force participation by age group.
+Used by : 04_break_tests.py, 05_period_analysis.py, 07_forecast.py
 
-Why a separate file, and not just a function inside lab_3.py? All
-three are reusable beyond this one script -- you might want this
-logic in a later lab, in your own research project, or in a
-problem set, without copying code between files. A function inside
-lab_3.py is only easy to reuse within lab_3.py; a function in its own
-module can be imported anywhere with
+Functions:
+  - run_chow_test()          Chow test for a break at a known date
+  - run_qlr_test()           QLR test for a break at an unknown date
+  - detect_multiple_breaks() Simplified Bai-Perron procedure (recursive QLR)
+  - dm_test()                Diebold-Mariano test of equal forecast accuracy
 
-    from functions import run_chow_test, run_qlr_test, detect_multiple_breaks
-
-The rule of thumb from Lab 2 still applies (keep vs. inline) -- this
-is the next step past it: once a function is reusable across SCRIPTS,
-not just within one script, it belongs in its own file.
-
-A note on detect_multiple_breaks(): this is a simplified, from-scratch
-version of Bai-Perron multiple-break detection, built using repeated
-calls to the same QLR logic as run_qlr_test() rather than a separate
-package. See the function's own docstring for why, and for the
-significance-level choice it uses.
+The first three functions were first developed in Lab 3 and adapted for
+this project. They live in a separate file so that every script can
+import them, instead of copying code between scripts.
 """
 
 import numpy as np
@@ -287,3 +277,53 @@ def detect_multiple_breaks(series, min_size=12, trim=0.15, alpha=0.0005):
 
     recurse(0, len(series))
     return sorted(breaks)
+
+def dm_test(e_1, e_2, h=1, small_sample=True):
+    """Diebold-Mariano test of equal forecast accuracy (squared-error loss).
+
+    Follows the course slides: d_t = L(e_1) - L(e_2), H0: E[d_t] = 0,
+    HA: E[d_t] != 0 (two-sided). d_bar > 0 means model 2 is more accurate.
+    The variance of d_bar is a Newey-West long-run variance with K = h - 1
+    lags; for h = 1 this reduces to the simple variance.
+
+    Parameters
+    ----------
+    e_1, e_2 : array-like
+        Forecast errors (actual minus forecast) of models 1 and 2.
+    h : int, default 1
+        Forecast horizon.
+    small_sample : bool, default True
+        If True, apply the Harvey-Leybourne-Newbold (1997) correction and
+        use a t(n-1) distribution; if False, use N(0,1) as in the slides.
+
+    Returns
+    -------
+    dict
+        Keys: "d_bar", "dm_stat", "p_value".
+    """
+    e_1, e_2 = np.asarray(e_1), np.asarray(e_2)
+
+    # Step 1-2 (slides): loss differential and its average.
+    d = e_1**2 - e_2**2
+    n = len(d)
+    d_bar = d.mean()
+
+    # Autocovariance of d at lag k: gamma_k = (1/n) * sum (d_t - d_bar)(d_{t-k} - d_bar)
+    def gamma(k):
+        return np.sum((d[k:] - d_bar) * (d[:n - k] - d_bar)) / n
+
+    # Long-run variance with Newey-West (Bartlett) weights w_k = 1 - k/(K+1).
+    # h-step errors overlap, so d_t is autocorrelated up to lag h-1.
+    K = h - 1
+    lrv = gamma(0) + 2 * sum((1 - k / (K + 1)) * gamma(k) for k in range(1, K + 1))
+
+    dm = d_bar / np.sqrt(lrv / n)
+
+    if small_sample:
+        # HLN: with few forecasts, N(0,1) is unreliable; rescale and use t(n-1).
+        dm = dm * np.sqrt((n + 1 - 2 * h + h * (h - 1) / n) / n)
+        p_value = 2 * (1 - stats.t.cdf(abs(dm), n - 1))
+    else:
+        p_value = 2 * (1 - stats.norm.cdf(abs(dm)))
+
+    return {"d_bar": d_bar, "dm_stat": dm, "p_value": p_value}

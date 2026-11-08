@@ -1,0 +1,3 @@
+sample,n_forecasts,rmse_full_drift,rmse_post_break_drift,d_bar,dm_normal,p_normal,dm_hln,p_hln
+All years (2015-2025),11,0.586,0.514,0.079,0.52,0.605,0.49,0.632
+Excluding 2020-2021,9,0.35,0.451,-0.081,-0.78,0.437,-0.73,0.485
