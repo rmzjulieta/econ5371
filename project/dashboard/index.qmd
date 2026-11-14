@@ -1,0 +1,598 @@
+---
+title: "Structural Breaks in U.S. Female Labor Force Participation"
+subtitle: "By age group, 1948–2025"
+author: "Julieta Ramirez · ECON 5371"
+format:
+  dashboard:
+    theme: [cosmo, dashboard-theme.scss]
+    nav-buttons:
+      - icon: github
+        href: https://github.com/rmzjulieta/econ5371/tree/main/project
+      - icon: file-earmark-text
+        href: https://github.com/rmzjulieta/econ5371/tree/main/project/paper
+---
+
+```{python}
+#| include: false
+# =============================================================================
+# SETUP CELL -- runs once, shows nothing. Every card below reads from the
+# objects created here, so every number on the dashboard is computed from
+# the data, never typed by hand.
+#
+# It repeats, in one place, the steps of the project scripts:
+#   03_unit_root_tests.py  -> unit_root_table
+#   04_break_tests.py      -> chow_table, break_table
+#   05_period_analysis.py  -> period_table
+#   07_forecast.py         -> forecasts, eval_table
+# =============================================================================
+import ast
+import contextlib
+import io
+import sys
+import warnings
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from IPython.display import Markdown
+from statsmodels.tools.sm_exceptions import InterpolationWarning
+from statsmodels.tsa.stattools import adfuller, kpss, zivot_andrews
+
+warnings.simplefilter("ignore", InterpolationWarning)
+
+# Quarto runs index.qmd from inside dashboard/, so everything else in the
+# project is one level up. Forward slashes work on Windows, Mac and Linux.
+DATA_PATH = Path("../data/clean/lfpr_women_by_age.csv")
+
+# The test functions (Chow, QLR, Bai-Perron, Diebold-Mariano) live in
+# code/functions.py. Adding that folder to the path lets us import the SAME
+# functions the paper uses instead of copying them here.
+sys.dont_write_bytecode = True   # do not leave a __pycache__ folder in code/
+sys.path.insert(0, str(Path("../code").resolve()))
+from functions import (run_chow_test, run_qlr_test, detect_multiple_breaks,
+                       dm_test)
+
+# --- Data ---------------------------------------------------------------------
+df = pd.read_csv(DATA_PATH, index_col="year")
+dy_all = df.diff().dropna()          # transformed series: annual change (pp)
+
+LABELS = {"age_16plus": "16+ (aggregate)", "age_16_24": "16-24",
+          "age_25_34": "25-34", "age_35_44": "35-44", "age_45_54": "45-54",
+          "age_55_64": "55-64", "age_65plus": "65+"}
+
+# One fixed color per age group, used on every chart. The aggregate is dark
+# and dashed so it reads as the benchmark, not as one more age group.
+COLORS = {"age_16plus": "#14313A", "age_16_24": "#00A3A6",
+          "age_25_34": "#1D5FBF", "age_35_44": "#EDA100",
+          "age_45_54": "#7A4FBF", "age_55_64": "#E8590C",
+          "age_65plus": "#C2417A"}
+TEAL, BLUE, YELLOW, ORANGE, INK = "#00A3A6", "#1D5FBF", "#EDA100", "#E8590C", "#14313A"
+GRID = "#E6ECEC"
+
+ANDREWS_5PCT = 8.85   # Andrews (1993) 5% critical value, one restriction, 15% trimming
+
+# --- Unit-root tests (script 03) ------------------------------------------------
+ur_rows = []
+for col in df.columns:
+    for form, series, reg in [("levels", df[col], "ct"),
+                              ("differences", df[col].diff().dropna(), "c")]:
+        adf_stat, adf_p, *_ = adfuller(series, regression=reg, autolag="BIC")
+        kpss_stat, kpss_p, *_ = kpss(series, regression=reg, nlags="auto")
+        za_stat, za_p, crit, lags, break_idx = zivot_andrews(
+            series, trim=0.15, maxlag=4, regression=reg, autolag="BIC")
+        ur_rows.append({"Age group": LABELS[col], "Form": form,
+                        "ADF stat": f"{adf_stat:.2f}", "ADF p": f"{adf_p:.3f}",
+                        "KPSS stat": f"{kpss_stat:.2f}", "KPSS p": f"{kpss_p:.3f}",
+                        "ZA stat": f"{za_stat:.2f}", "ZA p": f"{za_p:.3f}",
+                        "ZA break": int(series.index[break_idx])})
+unit_root_table = pd.DataFrame(ur_rows)
+
+# --- Break tests (script 04) ----------------------------------------------------
+# Candidate dates for the Chow test, chosen from the raw-series figure.
+CANDIDATES = {"age_16plus": [1999], "age_16_24": [1987, 2000],
+              "age_25_34": [1972], "age_35_44": [], "age_45_54": [],
+              "age_55_64": [], "age_65plus": [1985]}
+
+chow_rows, break_rows = [], []
+bp_years = {}          # Bai-Perron break years per series
+qlr_res = {}           # QLR break year and F per series
+
+# The functions print their results; here we only want the numbers, so the
+# printed output is captured and thrown away.
+with contextlib.redirect_stdout(io.StringIO()):
+    for col in df.columns:
+        dy = df[col].diff().dropna()
+        for year in CANDIDATES[col]:
+            res = run_chow_test(dy.values, dy.index.get_loc(year))
+            chow_rows.append({"Age group": LABELS[col], "Candidate year": year,
+                              "F-statistic": f"{res['f_stat']:.2f}",
+                              "p-value": f"{res['p_value']:.3f}",
+                              "Result": "Break" if res["reject_h0"] else "No break"})
+        qlr = run_qlr_test(dy.values, trim=0.15)
+        bp = detect_multiple_breaks(dy.values, min_size=12)
+        qlr_res[col] = {"year": int(dy.index[qlr["break_index"]]),
+                        "f_stat": float(qlr["f_stat"])}
+        bp_years[col] = [int(dy.index[b]) for b in bp]
+        break_rows.append({
+            "Age group": LABELS[col],
+            "QLR break year": qlr_res[col]["year"],
+            "QLR F": f"{qlr_res[col]['f_stat']:.2f}",
+            "Significant (5%)": "Yes" if qlr_res[col]["f_stat"] > ANDREWS_5PCT else "No",
+            "Bai-Perron breaks": ", ".join(map(str, bp_years[col])) or "None"})
+
+chow_table = pd.DataFrame(chow_rows)
+break_table = pd.DataFrame(break_rows)
+
+n_series_with_break = sum(len(v) > 0 for v in bp_years.values())
+n_breaks_total = sum(len(v) for v in bp_years.values())
+
+# --- Periods between breaks (script 05) -------------------------------------------
+period_rows = []
+periods = {}           # per series: list of (start, end, slope, intercept)
+for col in df.columns:
+    starts = [int(df.index.min())] + bp_years[col]
+    ends = [b - 1 for b in bp_years[col]] + [int(df.index.max())]
+    periods[col] = []
+    for start, end in zip(starts, ends):
+        seg = df.loc[start:end, col]
+        adf_p = adfuller(seg, regression="ct", maxlag=2, autolag="AIC")[1]
+        kpss_p = kpss(seg, regression="ct", nlags="auto")[1]
+        trend_stat = adf_p < 0.05 and kpss_p >= 0.05
+        slope, intercept = np.polyfit(seg.index.values, seg.values, 1)
+        periods[col].append((start, end, slope, intercept))
+        period_rows.append({"Age group": LABELS[col], "Start": start, "End": end,
+                            "Years": len(seg),
+                            "Classification": "Trend-stationary" if trend_stat
+                                              else "Diff-stationary",
+                            "Slope (pp/yr)": f"{slope:+.2f}",
+                            "Mean Δ (pp/yr)": f"{seg.diff().mean():+.2f}"})
+period_table = pd.DataFrame(period_rows)
+
+# --- Forecast comparison, aggregate 16+ (script 07) ---------------------------------
+SERIES = "age_16plus"
+LAST_TRAIN_YEAR = 2014
+TEST_YEARS = list(range(2015, 2026))
+COVID_YEARS = (2020, 2021)
+
+y = df[SERIES]
+dy_train = y.diff().dropna().loc[:LAST_TRAIN_YEAR]
+
+with contextlib.redirect_stdout(io.StringIO()):
+    qlr_train = run_qlr_test(dy_train.values)
+fc_break_year = int(dy_train.index[qlr_train["break_index"]])
+
+mu_full = dy_train.mean()                       # (a) ignores the break
+mu_post = dy_train.loc[fc_break_year:].mean()   # (b) uses the break
+
+actual = y.loc[TEST_YEARS].values
+y_prev = y.loc[[t - 1 for t in TEST_YEARS]].values
+fc_full = y_prev + mu_full
+fc_post = y_prev + mu_post
+e_full = actual - fc_full
+e_post = actual - fc_post
+
+no_covid = np.array([t not in COVID_YEARS for t in TEST_YEARS])
+samples = {"All years (2015-2025)": np.ones(len(TEST_YEARS), dtype=bool),
+           "Excluding 2020-2021": no_covid}
+eval_rows = []
+dm_all = None
+for label, mask in samples.items():
+    ea, eb = e_full[mask], e_post[mask]
+    hln = dm_test(ea, eb, h=1, small_sample=True)
+    if dm_all is None:
+        dm_all = hln
+    eval_rows.append({"Evaluation sample": label, "N": int(mask.sum()),
+                      "RMSE full-sample drift": f"{np.sqrt(np.mean(ea**2)):.3f}",
+                      "RMSE post-break drift": f"{np.sqrt(np.mean(eb**2)):.3f}",
+                      "Mean loss diff.": f"{hln['d_bar']:+.3f}",
+                      "DM (HLN)": f"{hln['dm_stat']:.2f}",
+                      "p-value": f"{hln['p_value']:.3f}"})
+eval_table = pd.DataFrame(eval_rows)
+rmse_full = np.sqrt(np.mean(e_full**2))
+rmse_post = np.sqrt(np.mean(e_post**2))
+
+
+# --- Helpers used by the cards --------------------------------------------------------
+def show_table(table, note=""):
+    """Render a DataFrame as a clean table inside a card, with an optional
+    note underneath (kept in the same card as the table)."""
+    # disable_numparse keeps numbers exactly as formatted (0.000, not 0)
+    text = table.to_markdown(index=False, disable_numparse=True)
+    if note:
+        text += f"\n\n*Notes:* {note}"
+    return Markdown(text)
+
+
+def base_layout(fig, ytitle, xrange=None):
+    """Shared look for every figure: light grid, legend on top, hover by year."""
+    fig.update_layout(
+        template="plotly_white", hovermode="x unified",
+        margin=dict(l=55, r=20, t=30, b=40),
+        font=dict(family="Inter, Arial, sans-serif", size=12, color=INK),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        xaxis=dict(title="Year", range=xrange, gridcolor=GRID, showline=True,
+                   linecolor="#9AA7A7"),
+        yaxis=dict(title=ytitle, gridcolor=GRID, zerolinecolor="#9AA7A7"))
+    return fig
+
+
+def lines_by_age(data, ytitle, fmt):
+    """One line per age group, same color everywhere."""
+    fig = go.Figure()
+    for col in data.columns:
+        is_agg = col == "age_16plus"
+        fig.add_trace(go.Scatter(
+            x=data.index, y=data[col], name=LABELS[col], mode="lines",
+            line=dict(color=COLORS[col], width=3 if is_agg else 2,
+                      dash="dash" if is_agg else "solid"),
+            hovertemplate=f"%{{y:{fmt}}}"))
+    return base_layout(fig, ytitle,
+                       xrange=[int(data.index.min()), int(data.index.max())])
+```
+
+# Overview
+
+## Row {height=18%}
+
+```{python}
+#| content: valuebox
+#| title: "Observations per series"
+#| icon: calendar3
+#| color: "#0B7A7C"
+dict(value=len(df))
+```
+
+```{python}
+#| content: valuebox
+#| title: "Sample (annual)"
+#| icon: clock-history
+#| color: "#1D4E9E"
+dict(value=f"'{str(df.index.min())[2:]}–'{str(df.index.max())[2:]}")
+```
+
+```{python}
+#| content: valuebox
+#| title: "Age-group series"
+#| icon: people
+#| color: "#F2B705"
+dict(value=df.shape[1])
+```
+
+```{python}
+#| content: valuebox
+#| title: "Series with a break"
+#| icon: scissors
+#| color: "#E8590C"
+dict(value=f"{n_series_with_break} of {df.shape[1]}")
+```
+
+## Row {.tabset height=52%}
+
+### Raw series (levels)
+
+```{python}
+#| title: "Labor force participation rate of U.S. women by age group (%)"
+lines_by_age(df, "Participation rate (%)", ".1f")
+```
+
+### Transformed series (first differences)
+
+```{python}
+#| title: "Annual change in the participation rate (percentage points)"
+lines_by_age(dy_all, "Annual change (pp)", "+.1f")
+```
+
+## Row {height=30%}
+
+### Column {width=62%}
+
+```{python}
+#| title: "Summary statistics, participation rate (%)"
+summary = pd.DataFrame({
+    "Age group": [LABELS[c] for c in df.columns],
+    "N": df.count().values,
+    "Mean": df.mean().map("{:.1f}".format).values,
+    "Std. dev.": df.std().map("{:.1f}".format).values,
+    "Min": df.min().map("{:.1f}".format).values,
+    "Max": df.max().map("{:.1f}".format).values,
+    "Year of max": df.idxmax().values,
+    str(df.index.min()): df.iloc[0].map("{:.1f}".format).values,
+    str(df.index.max()): df.iloc[-1].map("{:.1f}".format).values})
+show_table(summary)
+```
+
+### Column {width=38%}
+
+```{python}
+#| title: "About this project"
+Markdown("""
+**Question.** Did the labor force participation rate of U.S. women experience
+structural breaks, did they happen at different times for women of different
+ages, and does detecting them improve forecasts?
+
+**Method.** Each series is I(1), so it is modeled as a random walk with drift.
+A break is a change in the drift, tested on first differences with the Chow,
+QLR and Bai-Perron procedures.
+
+**Data.** U.S. Department of Labor, Women's Bureau (BLS Current Population
+Survey), annual averages.
+""")
+```
+
+# Structural Breaks
+
+## Row {height=18%}
+
+```{python}
+#| content: valuebox
+#| title: "Break year, aggregate (QLR)"
+#| icon: signpost-split
+#| color: "#0B7A7C"
+dict(value=qlr_res["age_16plus"]["year"])
+```
+
+```{python}
+#| content: valuebox
+#| title: "QLR F, aggregate (5% c.v. 8.85)"
+#| icon: graph-up
+#| color: "#1D4E9E"
+dict(value=f"{qlr_res['age_16plus']['f_stat']:.1f}")
+```
+
+```{python}
+#| content: valuebox
+#| title: "Aggregate slope after break, pp/yr"
+#| icon: graph-down
+#| color: "#F2B705"
+# Slope of the last period of the aggregate series (short on purpose:
+# long strings get clipped in a value box).
+dict(value=f"{periods['age_16plus'][-1][2]:+.2f}")
+```
+
+```{python}
+#| content: valuebox
+#| title: "Bai-Perron breaks, all series"
+#| icon: scissors
+#| color: "#E8590C"
+dict(value=n_breaks_total)
+```
+
+## Row {height=82%}
+
+### Column {width=56%}
+
+```{python}
+#| title: "Participation rate, Bai-Perron break years and period trends — choose an age group"
+# Note: in a dashboard, Quarto displays the value of EVERY top-level line,
+# not only the last one. Calls that return the figure are therefore assigned
+# to `_`, and the figure is shown once, by the final line `fig`.
+# One figure holding all seven age groups; the dropdown shows one at a time.
+# Each age group contributes three traces: the series, the fitted trend
+# within each period, and the vertical break lines.
+fig = go.Figure()
+cols = list(df.columns)
+for i, col in enumerate(cols):
+    s = df[col]
+    lo, hi = s.min(), s.max()
+    pad = 0.08 * (hi - lo)
+    visible = i == 0
+
+    _ = fig.add_trace(go.Scatter(
+        x=s.index, y=s.values, mode="lines", name="Participation rate",
+        line=dict(color=TEAL, width=2), visible=visible,
+        hovertemplate="%{y:.1f}%"))
+
+    # Trend within each period (None separates the periods)
+    tx, ty, labx, laby, labt = [], [], [], [], []
+    for start, end, slope, intercept in periods[col]:
+        yrs = np.arange(start, end + 1)
+        tx += list(yrs) + [None]
+        ty += list(slope * yrs + intercept) + [None]
+        labx.append((start + end) / 2)
+        laby.append(hi + pad)
+        labt.append(f"{slope:+.2f} pp/yr")
+    _ = fig.add_trace(go.Scatter(
+        x=tx, y=ty, mode="lines", name="Trend within period",
+        line=dict(color=ORANGE, width=2.5), visible=visible,
+        hovertemplate="trend %{y:.1f}%"))
+
+    bx, by = [], []
+    for b in bp_years[col]:
+        bx += [b, b, None]
+        by += [lo - pad, hi + 2 * pad, None]
+    _ = fig.add_trace(go.Scatter(
+        x=bx or [None], y=by or [None], mode="lines",
+        name="Break year" if bp_years[col] else "Break year (none found)",
+        line=dict(color=INK, width=1.5, dash="dash"), visible=visible,
+        hoverinfo="skip"))
+
+    # Slope of each period, written above the series
+    _ = fig.add_trace(go.Scatter(
+        x=labx, y=laby, mode="text", text=labt, showlegend=False,
+        textfont=dict(color=INK, size=12), visible=visible, hoverinfo="skip"))
+
+TRACES_PER_SERIES = 4
+buttons = []
+for i, col in enumerate(cols):
+    mask = [j // TRACES_PER_SERIES == i for j in range(len(fig.data))]
+    found = ", ".join(map(str, bp_years[col])) or "none"
+    buttons.append(dict(label=LABELS[col], method="update",
+                        args=[{"visible": mask},
+                              {"title.text": f"Women {LABELS[col]} · breaks: {found}"}]))
+
+_ = base_layout(fig, "Participation rate (%)",
+                xrange=[int(df.index.min()), int(df.index.max())])
+first_found = ", ".join(map(str, bp_years[cols[0]])) or "none"
+_ = fig.update_layout(
+    title=dict(text=f"Women {LABELS[cols[0]]} · breaks: {first_found}",
+               x=0.99, xanchor="right", y=0.98, font=dict(size=13)),
+    margin=dict(t=70),
+    legend=dict(orientation="h", yanchor="top", y=-0.16, x=0),
+    updatemenus=[dict(type="dropdown", buttons=buttons, direction="down",
+                      x=0, xanchor="left", y=1.18, yanchor="top",
+                      bgcolor="white", bordercolor=TEAL)])
+fig
+```
+
+### Column {.tabset width=44%}
+
+#### QLR and Bai-Perron
+
+```{python}
+show_table(break_table, note=(
+    "Tests applied to first differences. "
+    "QLR: 15% trimming, significant if F > 8.85 (Andrews, 1993). "
+    "Bai-Perron: recursive QLR, α = 0.0005, minimum period of 12 years. "
+    "Each break year is the first year of the new period."))
+```
+
+#### Chow
+
+```{python}
+show_table(chow_table, note=(
+    "H₀: the average annual change is the same before and after the candidate year. "
+    "Candidate years were chosen from the raw-series figure."))
+```
+
+#### Periods
+
+```{python}
+show_table(period_table, note=(
+    "Periods are defined by the Bai-Perron break years. "
+    "A period is trend-stationary if ADF rejects a unit root and KPSS does not reject stationarity (5%); otherwise difference-stationary. "
+    "Slope: linear trend fitted within the period. Mean Δ: average annual change."))
+```
+
+#### Unit roots
+
+```{python}
+show_table(unit_root_table, note=(
+    "ADF and Zivot-Andrews H₀: unit root. "
+    "KPSS H₀: stationarity (p-values bounded between 0.01 and 0.10). "
+    "Lag length by BIC."))
+```
+
+# Forecast
+
+## Row {height=18%}
+
+```{python}
+#| content: valuebox
+#| title: "Forecasts (2015–2025)"
+#| icon: bullseye
+#| color: "#0B7A7C"
+dict(value=len(TEST_YEARS))
+```
+
+```{python}
+#| content: valuebox
+#| title: "RMSE, full-sample drift (pp)"
+#| icon: rulers
+#| color: "#1D4E9E"
+dict(value=f"{rmse_full:.3f}")
+```
+
+```{python}
+#| content: valuebox
+#| title: "RMSE, post-break drift (pp)"
+#| icon: rulers
+#| color: "#F2B705"
+dict(value=f"{rmse_post:.3f}")
+```
+
+```{python}
+#| content: valuebox
+#| title: "Diebold-Mariano p-value"
+#| icon: question-circle
+#| color: "#E8590C"
+dict(value=f"{dm_all['p_value']:.2f}")
+```
+
+## Row {height=50%}
+
+### Column {width=60%}
+
+```{python}
+#| title: "One-step-ahead forecasts of the aggregate rate (16+), 2015–2025 (%)"
+context = y.loc[2005:]
+fig = go.Figure()
+_ = fig.add_trace(go.Scatter(
+    x=context.index, y=context.values, mode="lines", name="Actual",
+    line=dict(color=INK, width=2.5), hovertemplate="%{y:.1f}%"))
+_ = fig.add_trace(go.Scatter(
+    x=TEST_YEARS, y=fc_full, mode="lines+markers",
+    name=f"Full-sample drift ({mu_full:+.2f} pp/yr)",
+    line=dict(color=BLUE, width=2, dash="dash"),
+    marker=dict(size=8, symbol="circle"), hovertemplate="%{y:.2f}%"))
+_ = fig.add_trace(go.Scatter(
+    x=TEST_YEARS, y=fc_post, mode="lines+markers",
+    name=f"Post-{fc_break_year} drift ({mu_post:+.2f} pp/yr)",
+    line=dict(color=ORANGE, width=2, dash="dash"),
+    marker=dict(size=8, symbol="square"), hovertemplate="%{y:.2f}%"))
+_ = fig.add_vline(x=LAST_TRAIN_YEAR + 0.5, line=dict(color="#9AA7A7", dash="dot"))
+_ = fig.add_annotation(x=LAST_TRAIN_YEAR + 0.6, y=0.03, yref="paper", xanchor="left",
+                   text="Forecast period", showarrow=False,
+                   font=dict(color="#5C6B6B", size=11))
+base_layout(fig, "Participation rate (%)", xrange=[2005, 2025.3])
+```
+
+### Column {width=40%}
+
+```{python}
+#| title: "Cumulative loss differential (full-sample minus post-break squared error)"
+cum = np.cumsum(e_full**2 - e_post**2)
+fig = go.Figure()
+_ = fig.add_trace(go.Scatter(
+    x=TEST_YEARS, y=cum, mode="lines+markers", name="Cumulative differential",
+    line=dict(color=TEAL, width=2), marker=dict(size=8),
+    hovertemplate="%{y:+.2f}"))
+_ = fig.add_hline(y=0, line=dict(color="#9AA7A7", width=1))
+_ = base_layout(fig, "Cumulative differential (pp²)", xrange=[2014.5, 2025.5])
+_ = fig.update_layout(showlegend=False)
+fig
+```
+
+## Row {height=32%}
+
+### Column {width=60%}
+
+```{python}
+#| title: "Out-of-sample forecast accuracy"
+show_table(eval_table)
+```
+
+### Column {width=40%}
+
+```{python}
+#| title: "Reading the result"
+Markdown("""
+Both forecasts are a random walk with drift estimated through 2014 and
+differ only in the drift. The Diebold-Mariano test does not reject equal
+accuracy: detecting the 1998 break describes the past but does not improve
+forecasts of 2015–2025.
+""")
+```
+
+```{=html}
+<!-- Plotly measures the width of its legend and dropdown labels when a
+     figure is first drawn. While the dashboard is still loading (or the
+     figure sits on a hidden page or tab) those widths come back as zero and
+     the labels overlap. Nudging the font size once the figure is visible
+     makes Plotly measure the labels again. -->
+<script>
+(function () {
+  function refreshVisible() {
+    if (!window.Plotly) return;
+    document.querySelectorAll(".plotly-graph-div").forEach(function (div) {
+      if (div.offsetWidth > 0 && !div.dataset.refreshed) {
+        div.dataset.refreshed = "1";
+        window.Plotly.relayout(div, {"font.size": 12.5});
+      }
+    });
+  }
+  window.addEventListener("load", function () { setTimeout(refreshVisible, 400); });
+  document.addEventListener("shown.bs.tab", function () { setTimeout(refreshVisible, 150); });
+})();
+</script>
+```

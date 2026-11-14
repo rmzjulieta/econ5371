@@ -1,0 +1,76 @@
+/*-- scss:defaults --*/
+
+// Project palette: teal, blue and yellow, with a little orange for contrast
+$teal:   #0B7A7C;
+$blue:   #1D4E9E;
+$yellow: #F2B705;
+$orange: #E8590C;
+$ink:    #14313A;
+
+// Fonts: same pair as the course reference dashboard
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
+
+$font-family-sans-serif: "Inter", Arial, sans-serif;
+$headings-font-family: "Crimson Pro", Georgia, serif;
+$headings-font-weight: 700;
+
+// Bootstrap theme colors -- these drive the value box "color:" options
+// (primary = teal, secondary = blue, warning = yellow)
+$primary:   $teal;
+$secondary: $blue;
+$warning:   $yellow;
+
+$body-color: $ink;
+$link-color: $blue;
+
+$navbar-bg: $teal;
+$navbar-fg: #FFFFFF;
+
+/*-- scss:rules --*/
+
+h1, h2, h3 {
+  color: $ink;
+}
+
+// Card title bars: pale teal with a yellow rule underneath
+.card-header {
+  background-color: rgba($teal, 0.08);
+  border-bottom: 2px solid $yellow;
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+// Active tab: orange underline (the one place orange is used in the layout)
+.nav-tabs .nav-link.active {
+  border-bottom: 3px solid $orange;
+  color: $ink;
+  font-weight: 600;
+}
+
+// Tables inside cards: compact, with a clear header row
+.card-body table {
+  font-size: 0.85rem;
+  width: 100%;
+}
+.card-body table thead th {
+  border-bottom: 2px solid $teal;
+  white-space: nowrap;
+}
+.card-body p {
+  font-size: 0.92rem;
+}
+
+// Value boxes: white text on the dark (teal and blue) boxes, dark text on
+// the light (yellow and orange) ones. Quarto does not pick the text color
+// automatically when a box is given a hex color.
+.bslib-value-box {
+  color: $ink;
+  --bslib-color-fg: #{$ink};
+}
+.bslib-value-box[style*="#0B7A7C"],
+.bslib-value-box[style*="#1D4E9E"] {
+  color: #FFFFFF;
+  --bslib-color-fg: #FFFFFF;
+  .value-box-title, .value-box-value, .value-box-showcase, p, i { color: #FFFFFF; }
+}
