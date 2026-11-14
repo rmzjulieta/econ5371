@@ -5,6 +5,9 @@ author: "Julieta Ramirez · ECON 5371"
 format:
   dashboard:
     theme: [cosmo, dashboard-theme.scss]
+    # scrolling: the page scrolls instead of squeezing every card into one
+    # screen, so charts keep a readable height on small laptop screens.
+    scrolling: true
     nav-buttons:
       - icon: github
         href: https://github.com/rmzjulieta/econ5371/tree/main/project
@@ -233,7 +236,10 @@ def lines_by_age(data, ytitle, fmt):
 
 # Overview
 
-## Row {height=18%}
+<!-- Every row has a fixed height in pixels (the page scrolls), so numbers
+     and charts are never squeezed or cut off on a short screen. -->
+
+## Row {height=130px}
 
 ```{python}
 #| content: valuebox
@@ -267,7 +273,7 @@ dict(value=df.shape[1])
 dict(value=f"{n_series_with_break} of {df.shape[1]}")
 ```
 
-## Row {.tabset height=52%}
+## Row {.tabset height=470px}
 
 ### Raw series (levels)
 
@@ -283,7 +289,7 @@ lines_by_age(df, "Participation rate (%)", ".1f")
 lines_by_age(dy_all, "Annual change (pp)", "+.1f")
 ```
 
-## Row {height=30%}
+## Row {height=330px}
 
 ### Column {width=62%}
 
@@ -322,7 +328,7 @@ Survey), annual averages.
 
 # Structural Breaks
 
-## Row {height=18%}
+## Row {height=130px}
 
 ```{python}
 #| content: valuebox
@@ -358,7 +364,7 @@ dict(value=f"{periods['age_16plus'][-1][2]:+.2f}")
 dict(value=n_breaks_total)
 ```
 
-## Row {height=82%}
+## Row {height=640px}
 
 ### Column {width=56%}
 
@@ -475,7 +481,7 @@ show_table(unit_root_table, note=(
 
 # Forecast
 
-## Row {height=18%}
+## Row {height=130px}
 
 ```{python}
 #| content: valuebox
@@ -509,7 +515,7 @@ dict(value=f"{rmse_post:.3f}")
 dict(value=f"{dm_all['p_value']:.2f}")
 ```
 
-## Row {height=50%}
+## Row {height=430px}
 
 ### Column {width=60%}
 
@@ -553,7 +559,7 @@ _ = fig.update_layout(showlegend=False)
 fig
 ```
 
-## Row {height=32%}
+## Row {height=230px}
 
 ### Column {width=60%}
 
