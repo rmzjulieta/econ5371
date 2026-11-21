@@ -2,10 +2,13 @@
 03_unit_root_tests.py
 
 Purpose : Test each female LFPR series for a unit root, in levels and in
-          first differences, using ADF and KPSS. The results decide whether
-          the structural break tests are run on levels or on differences.
+          first differences, using ADF and KPSS, and Zivot-Andrews, which
+          allows for one structural break at an unknown date. The results
+          decide whether the structural break tests are run on levels or on
+          differences.
 Input   : data/clean/lfpr_women_by_age.csv
-Output  : output/table2_unit_root_tests.csv
+Outputs : output/table2_unit_root_tests.csv  (ADF and KPSS)
+          output/table3_zivot_andrews.csv    (Zivot-Andrews)
 """
 
 from pathlib import Path
