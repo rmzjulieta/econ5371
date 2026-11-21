@@ -1,19 +1,17 @@
 """
-functions.py -- ECON 5371 research project
+functions.py
 
-Purpose : Reusable test functions for the structural break and forecast
-          analysis of U.S. female labor force participation by age group.
-Used by : 04_break_tests.py, 05_period_analysis.py, 07_forecast.py
-
-Functions:
-  - run_chow_test()          Chow test for a break at a known date
-  - run_qlr_test()           QLR test for a break at an unknown date
-  - detect_multiple_breaks() Simplified Bai-Perron procedure (recursive QLR)
-  - dm_test()                Diebold-Mariano test of equal forecast accuracy
-
-The first three functions were first developed in Lab 3 and adapted for
-this project. They live in a separate file so that every script can
-import them, instead of copying code between scripts.
+Purpose : Structural break test functions used by 04_break_tests.py:
+            - run_chow_test()          Chow test at a known break point
+            - run_qlr_test()           QLR test for one break at an unknown date
+            - detect_multiple_breaks() simplified Bai-Perron-style multiple-break
+                                       detection, by recursive QLR segmentation
+          All three test for a change in the MEAN of the series passed to them
+          (in this project, the first-differenced LFPR series).
+Inputs  : none directly; each function receives a series from the calling script
+Outputs : none directly; each function returns its results to the calling script
+Source  : Adapted from ECON 5371 (Time Series Analysis and Forecasting),
+          Lab 3: Structural Breaks, course materials.
 """
 
 import numpy as np
