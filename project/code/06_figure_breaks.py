@@ -67,4 +67,6 @@ fig.suptitle("Female labor force participation by age group: "
              fontsize=11)
 fig.tight_layout()
 fig.savefig(FIG_FILE, dpi=200)
-plt.show()
+# Close the figure instead of displaying it, so the script finishes on its
+# own when run from the terminal; the saved PNG is the output.
+plt.close(fig)
