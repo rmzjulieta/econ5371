@@ -11,10 +11,16 @@ Outputs : output/table2_unit_root_tests.csv  (ADF and KPSS)
           output/table3_zivot_andrews.csv    (Zivot-Andrews)
 """
 
+import warnings
 from pathlib import Path
 
 import pandas as pd
+from statsmodels.tools.sm_exceptions import InterpolationWarning
 from statsmodels.tsa.stattools import adfuller, kpss, zivot_andrews
+
+# KPSS p-values are bounded between 0.01 and 0.10; this is noted in the paper,
+# so the repeated warning is silenced here to keep the console readable.
+warnings.simplefilter("ignore", InterpolationWarning)
 
 # --- Paths -----------------------------------------------------------------
 # Same convention as 01 and 02: paths are built from this script's location.
@@ -41,8 +47,10 @@ results = []
 for col in df.columns:
     for form, series, reg in [("levels", df[col], "ct"),
                               ("differences", df[col].diff().dropna(), "c")]:
-        adf_stat, adf_p, *_ = adfuller(series, regression=reg, autolag="BIC")
-        kpss_stat, kpss_p, *_ = kpss(series, regression=reg, nlags="auto")
+        adf_stat, adf_p, *_ = adfuller(series, regression=reg, autolag="BIC",
+                                       result_object=False)
+        kpss_stat, kpss_p, *_ = kpss(series, regression=reg, nlags="auto",
+                                     result_object=False)
         results.append({"series": col, "form": form,
                         "adf_stat": round(adf_stat, 2), "adf_p": round(adf_p, 3),
                         "kpss_stat": round(kpss_stat, 2), "kpss_p": round(kpss_p, 3)})
