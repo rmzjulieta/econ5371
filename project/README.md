@@ -23,10 +23,14 @@ For each series, I first test for unit roots (ADF, KPSS, and Zivot–Andrews tes
 - matplotlib 3.11.2
 - scipy 1.17.1
 - For the dashboard only: Quarto, jupyter, plotly, tabulate
+- All versions are pinned in `project/environment.yml`.
 
 ## Replication instructions
 
-Activate the conda environment and run the scripts in order from the repository root:
+Create and activate the conda environment, then run the scripts in order from the repository root:
+
+    conda env create -f project/environment.yml
+    conda activate econ5371
 
 1. `python project/code/01_clean_data.py` — reads the raw file in `data/raw/`, reshapes it (years as rows), and saves `data/clean/lfpr_women_by_age.csv`.
 2. `python project/code/02_summary_stats.py` — produces `output/table1_summary_stats.csv` (summary statistics) and `output/fig1_lfpr_by_age.png` (raw series' figure).
