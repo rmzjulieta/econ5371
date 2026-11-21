@@ -29,15 +29,16 @@ CHOW_FILE.parent.mkdir(parents=True, exist_ok=True)
 df = pd.read_csv(CLEAN_FILE, index_col="year")
 
 # --- Candidate break dates for the Chow test ---------------------------------
-# One list per series. Each date must be justified in the paper (data memo
-# figure, historical or policy event). FILL IN the empty lists.
+# One list per series. Dates are chosen a priori from historical and policy
+# events (not from the break tests below); each is justified in the paper.
+# The year entered is the first year of the new period.
 candidates = {
     "age_16plus": [1999],
     "age_16_24": [1987, 2000],
     "age_25_34": [1972],
-    "age_35_44": [],
-    "age_45_54": [],
-    "age_55_64": [],
+    "age_35_44": [1973],
+    "age_45_54": [1999],
+    "age_55_64": [1987],
     "age_65plus": [1985],
 }
 
