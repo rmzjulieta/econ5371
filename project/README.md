@@ -47,4 +47,3 @@ Activate the conda environment and run the scripts in order from the repository 
 
 ## Dashboard
 The dashboard source is in dashboard/ (index.qmd, _quarto.yml, dashboard-theme.scss). It recomputes every result from data/clean/ using code/functions.py. To rebuild it, run quarto render from inside project/dashboard/; the site is written to docs/ at the repository root, which GitHub Pages serves.
-

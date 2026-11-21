@@ -66,11 +66,13 @@ LABELS = {"age_16plus": "16+ (aggregate)", "age_16_24": "16-24",
 
 # One fixed color per age group, used on every chart. The aggregate is dark
 # and dashed so it reads as the benchmark, not as one more age group.
-COLORS = {"age_16plus": "#14313A", "age_16_24": "#00A3A6",
+COLORS = {"age_16plus": "#041E42", "age_16_24": "#00A3A6",
           "age_25_34": "#1D5FBF", "age_35_44": "#EDA100",
           "age_45_54": "#7A4FBF", "age_55_64": "#E8590C",
           "age_65plus": "#C2417A"}
-TEAL, BLUE, YELLOW, ORANGE, INK = "#00A3A6", "#1D5FBF", "#EDA100", "#E8590C", "#14313A"
+# UTEP Blue and Orange for the main lines; a lighter blue where a second
+# blue is needed so the two stay distinguishable.
+TEAL, BLUE, YELLOW, ORANGE, INK = "#041E42", "#2F6FC4", "#B1B3B3", "#FF8200", "#041E42"
 GRID = "#E6ECEC"
 
 ANDREWS_5PCT = 8.85   # Andrews (1993) 5% critical value, one restriction, 15% trimming
@@ -245,7 +247,7 @@ def lines_by_age(data, ytitle, fmt):
 #| content: valuebox
 #| title: "Observations per series"
 #| icon: calendar3
-#| color: "#0B7A7C"
+#| color: "#041E42"
 dict(value=len(df))
 ```
 
@@ -253,7 +255,7 @@ dict(value=len(df))
 #| content: valuebox
 #| title: "Sample (annual)"
 #| icon: clock-history
-#| color: "#1D4E9E"
+#| color: "#FF8200"
 dict(value=f"'{str(df.index.min())[2:]}–'{str(df.index.max())[2:]}")
 ```
 
@@ -261,7 +263,7 @@ dict(value=f"'{str(df.index.min())[2:]}–'{str(df.index.max())[2:]}")
 #| content: valuebox
 #| title: "Age-group series"
 #| icon: people
-#| color: "#F2B705"
+#| color: "#B1B3B3"
 dict(value=df.shape[1])
 ```
 
@@ -269,7 +271,7 @@ dict(value=df.shape[1])
 #| content: valuebox
 #| title: "Series with a break"
 #| icon: scissors
-#| color: "#E8590C"
+#| color: "#041E42"
 dict(value=f"{n_series_with_break} of {df.shape[1]}")
 ```
 
@@ -334,7 +336,7 @@ Survey), annual averages.
 #| content: valuebox
 #| title: "Break year, aggregate (QLR)"
 #| icon: signpost-split
-#| color: "#0B7A7C"
+#| color: "#041E42"
 dict(value=qlr_res["age_16plus"]["year"])
 ```
 
@@ -342,7 +344,7 @@ dict(value=qlr_res["age_16plus"]["year"])
 #| content: valuebox
 #| title: "QLR F, aggregate (5% c.v. 8.85)"
 #| icon: graph-up
-#| color: "#1D4E9E"
+#| color: "#FF8200"
 dict(value=f"{qlr_res['age_16plus']['f_stat']:.1f}")
 ```
 
@@ -350,7 +352,7 @@ dict(value=f"{qlr_res['age_16plus']['f_stat']:.1f}")
 #| content: valuebox
 #| title: "Aggregate slope after break, pp/yr"
 #| icon: graph-down
-#| color: "#F2B705"
+#| color: "#B1B3B3"
 # Slope of the last period of the aggregate series (short on purpose:
 # long strings get clipped in a value box).
 dict(value=f"{periods['age_16plus'][-1][2]:+.2f}")
@@ -360,7 +362,7 @@ dict(value=f"{periods['age_16plus'][-1][2]:+.2f}")
 #| content: valuebox
 #| title: "Bai-Perron breaks, all series"
 #| icon: scissors
-#| color: "#E8590C"
+#| color: "#041E42"
 dict(value=n_breaks_total)
 ```
 
@@ -487,7 +489,7 @@ show_table(unit_root_table, note=(
 #| content: valuebox
 #| title: "Forecasts (2015–2025)"
 #| icon: bullseye
-#| color: "#0B7A7C"
+#| color: "#041E42"
 dict(value=len(TEST_YEARS))
 ```
 
@@ -495,7 +497,7 @@ dict(value=len(TEST_YEARS))
 #| content: valuebox
 #| title: "RMSE, full-sample drift (pp)"
 #| icon: rulers
-#| color: "#1D4E9E"
+#| color: "#FF8200"
 dict(value=f"{rmse_full:.3f}")
 ```
 
@@ -503,7 +505,7 @@ dict(value=f"{rmse_full:.3f}")
 #| content: valuebox
 #| title: "RMSE, post-break drift (pp)"
 #| icon: rulers
-#| color: "#F2B705"
+#| color: "#B1B3B3"
 dict(value=f"{rmse_post:.3f}")
 ```
 
@@ -511,7 +513,7 @@ dict(value=f"{rmse_post:.3f}")
 #| content: valuebox
 #| title: "Diebold-Mariano p-value"
 #| icon: question-circle
-#| color: "#E8590C"
+#| color: "#041E42"
 dict(value=f"{dm_all['p_value']:.2f}")
 ```
 

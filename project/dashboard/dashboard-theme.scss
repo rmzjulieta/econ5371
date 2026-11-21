@@ -1,50 +1,46 @@
 /*-- scss:defaults --*/
 
-// Project palette: teal, blue and yellow, with a little orange for contrast
-$teal:   #0B7A7C;
-$blue:   #1D4E9E;
-$yellow: #F2B705;
-$orange: #E8590C;
-$ink:    #14313A;
+// UTEP institutional colors (same values as the course reference theme)
+$utep-orange: #FF8200;
+$utep-blue:   #041E42;
+$utep-silver: #B1B3B3;
 
-// Fonts: same pair as the course reference dashboard
+// Fonts: Crimson Pro (headings) and Inter (body text), UTEP's brand fonts
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
 
 $font-family-sans-serif: "Inter", Arial, sans-serif;
 $headings-font-family: "Crimson Pro", Georgia, serif;
 $headings-font-weight: 700;
 
-// Bootstrap theme colors -- these drive the value box "color:" options
-// (primary = teal, secondary = blue, warning = yellow)
-$primary:   $teal;
-$secondary: $blue;
-$warning:   $yellow;
+$primary:   $utep-blue;
+$secondary: $utep-silver;
 
-$body-color: $ink;
-$link-color: $blue;
+$body-color: $utep-blue;
+$link-color: #C25F00;   // darker UTEP orange, readable as link text
 
-$navbar-bg: $teal;
+// Navbar: UTEP Blue background, white text
+$navbar-bg: $utep-blue;
 $navbar-fg: #FFFFFF;
 
 /*-- scss:rules --*/
 
 h1, h2, h3 {
-  color: $ink;
+  color: $utep-blue;
 }
 
-// Card title bars: pale teal with a yellow rule underneath
+// Card title bars: pale silver with an orange rule underneath
 .card-header {
-  background-color: rgba($teal, 0.08);
-  border-bottom: 2px solid $yellow;
+  background-color: rgba($utep-silver, 0.15);
+  border-bottom: 2px solid $utep-orange;
   font-family: $headings-font-family;
   font-weight: 600;
   font-size: 1.05rem;
 }
 
-// Active tab: orange underline (the one place orange is used in the layout)
+// Active tab: orange underline
 .nav-tabs .nav-link.active {
-  border-bottom: 3px solid $orange;
-  color: $ink;
+  border-bottom: 3px solid $utep-orange;
+  color: $utep-blue;
   font-weight: 600;
 }
 
@@ -54,22 +50,19 @@ h1, h2, h3 {
   width: 100%;
 }
 .card-body table thead th {
-  border-bottom: 2px solid $teal;
+  border-bottom: 2px solid $utep-blue;
   white-space: nowrap;
 }
 .card-body p {
   font-size: 0.92rem;
 }
 
-// Value boxes: white text on the dark (teal and blue) boxes, dark text on
-// the light (yellow and orange) ones. Quarto does not pick the text color
-// automatically when a box is given a hex color.
+// Value boxes: white text on UTEP Blue, dark blue text on orange and silver.
 .bslib-value-box {
-  color: $ink;
-  --bslib-color-fg: #{$ink};
+  color: $utep-blue;
+  --bslib-color-fg: #{$utep-blue};
 }
-.bslib-value-box[style*="#0B7A7C"],
-.bslib-value-box[style*="#1D4E9E"] {
+.bslib-value-box[style*="#041E42"] {
   color: #FFFFFF;
   --bslib-color-fg: #FFFFFF;
   .value-box-title, .value-box-value, .value-box-showcase, p, i { color: #FFFFFF; }
@@ -90,3 +83,7 @@ h1, h2, h3 {
   .bslib-value-box .value-box-showcase { display: none !important; }
   .bslib-value-box .value-box-grid { grid-template-columns: 1fr !important; grid-template-rows: 1fr !important; }
 }
+
+// Hide the gray Plotly toolbar (camera, zoom, pan...) that appears over the
+// charts on hover and overlaps the legend. Hover tooltips still work.
+.modebar-container { display: none !important; }
