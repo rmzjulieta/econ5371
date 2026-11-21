@@ -146,7 +146,7 @@ ax.xaxis.set_major_locator(MaxNLocator(integer=True))  # whole years only
 ax.legend(fontsize=9)
 plt.tight_layout()
 plt.savefig(FIG_FC_FILE, dpi=300)
-plt.show()
+plt.close(fig)
 
 # --- 6. Figure: cumulative loss differential (as in the course slides) -----------
 # Cumulative sum of d_t = e_full^2 - e_post^2. When the line rises, the
@@ -166,4 +166,4 @@ ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 ax.legend(fontsize=9)
 plt.tight_layout()
 plt.savefig(FIG_LOSS_FILE, dpi=300)
-plt.show()
+plt.close(fig)
