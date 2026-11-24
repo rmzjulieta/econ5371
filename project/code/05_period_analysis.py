@@ -48,7 +48,7 @@ for col in df.columns:
 
         # Unit-root tests in levels, allowing a linear trend ("ct").
         # maxlag=2: periods are short (12+ years), so few lags are affordable.
-        adf_p = adfuller(segment, regression="ct", maxlag=2, autolag="AIC",
+        adf_p = adfuller(segment, regression="ct", maxlag=2, autolag="BIC",
                          result_object=False)[1]
         kpss_p = kpss(segment, regression="ct", nlags="auto",
                       result_object=False)[1]
