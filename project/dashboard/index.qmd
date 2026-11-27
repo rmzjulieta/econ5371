@@ -75,7 +75,7 @@ COLORS = {"age_16plus": "#041E42", "age_16_24": "#00A3A6",
 TEAL, BLUE, YELLOW, ORANGE, INK = "#041E42", "#2F6FC4", "#B1B3B3", "#FF8200", "#041E42"
 GRID = "#E6ECEC"
 
-ANDREWS_5PCT = 8.85   # Andrews (1993) 5% critical value, one restriction, 15% trimming
+ANDREWS_5PCT = 8.68   # Andrews (2003) 5% critical value, one restriction, 15% trimming
 
 # --- Unit-root tests (script 03) ------------------------------------------------
 ur_rows = []
@@ -342,7 +342,7 @@ dict(value=qlr_res["age_16plus"]["year"])
 
 ```{python}
 #| content: valuebox
-#| title: "QLR F, aggregate (5% c.v. 8.85)"
+#| title: "QLR F, aggregate (5% c.v. 8.68)"
 #| icon: graph-up
 #| color: "#FF8200"
 dict(value=f"{qlr_res['age_16plus']['f_stat']:.1f}")
@@ -450,7 +450,7 @@ fig
 ```{python}
 show_table(break_table, note=(
     "Tests applied to first differences. "
-    "QLR: 15% trimming, significant if F > 8.85 (Andrews, 1993). "
+    "QLR: 15% trimming, significant if F > 8.68 (Andrews, 2003). "
     "Bai-Perron: recursive QLR, α = 0.0005, minimum period of 12 years. "
     "Each break year is the first year of the new period."))
 ```
