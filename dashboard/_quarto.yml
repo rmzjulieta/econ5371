@@ -1,0 +1,5 @@
+# The dashboard lives in econ5371/dashboard/, so the rendered site goes one
+# level up, to docs/ at the repository root -- the folder GitHub Pages serves.
+project:
+  type: default
+  output-dir: ../docs

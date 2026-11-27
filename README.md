@@ -23,22 +23,22 @@ For each series, I first test for unit roots (ADF, KPSS, and Zivot–Andrews tes
 - matplotlib 3.11.2
 - scipy 1.17.1
 - For the dashboard only: Quarto, jupyter, plotly, tabulate
-- All versions are pinned in `project/environment.yml`.
+- All versions are pinned in `environment.yml`.
 
 ## Replication instructions
 
 Create and activate the conda environment, then run the scripts in order from the repository root:
 
-    conda env create -f project/environment.yml
+    conda env create -f environment.yml
     conda activate econ5371
 
-1. `python project/code/01_clean_data.py` — reads the raw file in `data/raw/`, reshapes it (years as rows), and saves `data/clean/lfpr_women_by_age.csv`.
-2. `python project/code/02_summary_stats.py` — produces `output/table1_summary_stats.csv` (summary statistics) and `output/fig1_lfpr_by_age.png` (raw series' figure).
-3. `python project/code/03_unit_root_tests.py` — ADF, KPSS and Zivot–Andrews unit-root tests in levels and first differences; saves output/table2_unit_root_tests.csv and output/table3_zivot_andrews.csv.
-4.  `python project/code/04_break_tests.py` — Chow, QLR and Bai–Perron break tests on the first-differenced series, using functions.py (ECON 5371, Lab 3); saves output/table4_chow_tests.csv and output/table5_qlr_baiperron.csv.
-5.  `python project/code/05_period_analysis.py` — splits each series at its break years and classifies each period as trend-stationary or difference-stationary; saves output/table6_period_analysis.csv.
-6.  `python project/code/06_figure_breaks.py` — plots each series with its Bai–Perron breaks and period trends; saves output/fig2_breaks_by_age.png.
-7.  `python project/code/07_forecast.py`: out-of-sample forecast comparison (2015–2025). Outputs: table7_forecast_evaluation.csv, forecasts_2015_2025.csv, fig3_forecasts.png, fig4_cumulative_loss.png.
+1. `python code/01_clean_data.py` — reads the raw file in `data/raw/`, reshapes it (years as rows), and saves `data/clean/lfpr_women_by_age.csv`.
+2. `python code/02_summary_stats.py` — produces `output/table1_summary_stats.csv` (summary statistics) and `output/fig1_lfpr_by_age.png` (raw series' figure).
+3. `python code/03_unit_root_tests.py` — ADF, KPSS and Zivot–Andrews unit-root tests in levels and first differences; saves output/table2_unit_root_tests.csv and output/table3_zivot_andrews.csv.
+4.  `python code/04_break_tests.py` — Chow, QLR and Bai–Perron break tests on the first-differenced series, using functions.py (ECON 5371, Lab 3); saves output/table4_chow_tests.csv and output/table5_qlr_baiperron.csv.
+5.  `python code/05_period_analysis.py` — splits each series at its break years and classifies each period as trend-stationary or difference-stationary; saves output/table6_period_analysis.csv.
+6.  `python code/06_figure_breaks.py` — plots each series with its Bai–Perron breaks and period trends; saves output/fig2_breaks_by_age.png.
+7.  `python code/07_forecast.py`: out-of-sample forecast comparison (2015–2025). Outputs: table7_forecast_evaluation.csv, forecasts_2015_2025.csv, fig3_forecasts.png, fig4_cumulative_loss.png.
 
 ## Folder structure
 
@@ -50,4 +50,4 @@ Create and activate the conda environment, then run the scripts in order from th
 - `dashboard/` — Quarto dashboard files
 
 ## Dashboard
-The dashboard source is in dashboard/ (index.qmd, _quarto.yml, dashboard-theme.scss). It recomputes every result from data/clean/ using code/functions.py. To rebuild it, run quarto render from inside project/dashboard/; the site is written to docs/ at the repository root, which GitHub Pages serves.
+The dashboard source is in dashboard/ (index.qmd, _quarto.yml, dashboard-theme.scss). It recomputes every result from data/clean/ using code/functions.py. To rebuild it, run quarto render from inside dashboard/; the site is written to docs/ at the repository root, which GitHub Pages serves.

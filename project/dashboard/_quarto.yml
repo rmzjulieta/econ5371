@@ -1,6 +1,0 @@
-# The project lives in econ5371/project/, so the rendered site has to go
-# TWO levels up to reach docs/ at the repository root -- the only place
-# GitHub Pages can serve from (besides the root itself).
-project:
-  type: default
-  output-dir: ../../docs

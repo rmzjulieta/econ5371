@@ -12,7 +12,7 @@ format:
       - icon: github
         href: https://github.com/rmzjulieta/econ5371/tree/main/project
       - icon: file-earmark-text
-        href: https://github.com/rmzjulieta/econ5371/tree/main/project/paper
+        href: https://github.com/rmzjulieta/econ5371/tree/main/paper
 ---
 
 ```{python}
