@@ -141,7 +141,7 @@ for col in df.columns:
     periods[col] = []
     for start, end in zip(starts, ends):
         seg = df.loc[start:end, col]
-        adf_p = adfuller(seg, regression="ct", maxlag=2, autolag="AIC")[1]
+        adf_p = adfuller(seg, regression="ct", maxlag=2, autolag="BIC")[1]
         kpss_p = kpss(seg, regression="ct", nlags="auto")[1]
         trend_stat = adf_p < 0.05 and kpss_p >= 0.05
         slope, intercept = np.polyfit(seg.index.values, seg.values, 1)
