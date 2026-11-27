@@ -1,2 +1,4 @@
 desktop.ini
 __pycache__/
+/.quarto/
+**/*.quarto_ipynb
